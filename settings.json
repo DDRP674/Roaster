@@ -1,0 +1,87 @@
+{
+    // 设置
+    "input_dir": "./input", // 存放待处理音频的地方，将为所有文件生成一份字幕
+    "input_exts": [".mp4", ".mkv", ".avi", ".mp3", ".wav", ".flac", ".m4a"],
+    "description_input_path": "./input/description.txt", 
+    "output_dir": "./output",
+
+    // 是否润色
+    "enable_refine": true,
+    // 单次翻译的行数
+    "chunk_size": 10,
+    // 爬虫
+    "Crawler": {
+        // 是否启用网络搜索（用于消融实验）
+        "enable_crawler": true,
+        // {query}是query所在的部分，实际使用时会自动替换
+        "website": "https://cn.bing.com/search?q={query}"
+    },
+    // 是否启用本地搜索（用于消融实验）
+    "search_local": true,
+    // 是否STT和翻译并行，显存不足可以改为false
+    "enable_parallel": true, 
+    // 最大迂回数
+    "max_retry": 3,
+    // embedding模型名
+    "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    // 删除处理后的STT文件
+    "delete_stt": true,
+    // 是否在多个待转录媒体之间共用记忆库
+    "global_memory": true,
+    // 输出时的替换词
+    "replacing": {" ": ["。", "，"]},
+
+    // 日志设置
+    "log_dir": "./log",
+    "do_log": true,
+
+    // STT
+    "stts": {
+        "engine": "stable_whisper", // whisper, stable_whisper (推荐stable_whisper)
+        "output_dir": "STT/temp", // 临时存放字幕文件的目录
+        "engine_settings": {
+            "whisper": {
+                "model": "medium", // large需要8G显存，可以换成base、small等
+                "no_speech_threshold": 0.7, // 检测没有说话声的阈值
+                "use_initial_prompt": false, // 是否启用初始提示词。这个可能出问题。
+                "original_language": "", // 原语言，未指定则由stt判断（未实装）
+                "hallucination_control": 0.4 // 幻觉控制阈值
+            },
+            "stable_whisper": {
+                "model": "medium", // large需要8G显存，可以换成base、small等
+                "no_speech_threshold": 0.7, // 检测没有说话声的阈值
+                "use_initial_prompt": false, // 是否启用初始提示词。这个可能出问题。
+                "original_language": "" // 原语言，未指定则由stt判断（未实装）
+            },
+            "whisperx": {
+
+            }
+        }
+    },
+
+    // LLM
+    "llms": {
+        "SmallModel": {
+            // DeepSeek
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3
+        },
+        "LargeModel": {
+            // DeepSeek
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3
+        },
+        "LargeModelJson": {
+            // DeepSeek
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3,
+            "response_format": {"type": "json_object"}
+        }
+    }
+}
