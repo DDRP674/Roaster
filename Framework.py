@@ -3,7 +3,7 @@ import logging
 import os
 import queue
 import threading, LLMAPI, Formats
-from lib_helper import func_name, load_json_with_comments
+from lib_helper import func_name, load_json_with_comments, get_filename
 import STT.STTServer, Tools.Database, Tools.VectorDatabase, Tools.Crawler
 
 class Framework:
@@ -425,3 +425,6 @@ class Framework:
         """把资源清一清"""
         self.db.clear()
         self.vdb.__del__()
+        if self.settings["delete_stt"]:
+            for path in get_filename(self.settings["stts"]["output_dir"]): 
+                if os.path.exists(os.path.normpath(path)): os.remove(os.path.normpath(path))

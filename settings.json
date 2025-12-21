@@ -6,18 +6,18 @@
     "output_dir": "./output",
 
     // 是否润色
-    "enable_refine": true,
+    "enable_refine": false,
     // 单次翻译的行数
-    "chunk_size": 10,
+    "chunk_size": 50,
     // 爬虫
     "Crawler": {
         // 是否启用网络搜索（用于消融实验）
-        "enable_crawler": true,
+        "enable_crawler": false,
         // {query}是query所在的部分，实际使用时会自动替换
         "website": "https://cn.bing.com/search?q={query}"
     },
     // 是否启用本地搜索（用于消融实验）
-    "search_local": true,
+    "search_local": false,
     // 是否STT和翻译并行，显存不足可以改为false
     "enable_parallel": true, 
     // 最大迂回数
