@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import pysubs2
@@ -48,6 +49,19 @@ def json2subtitle(JsonData: dict, output_dir: str, filename: str, replacing: dic
     except Exception as e:
         logging.error(f"字幕转换过程中出错: {e}")
         return False
+
+def delay_segment_ends(JsonData: dict, delay_seconds: float) -> dict:
+    """将每段的 end 延后 delay_seconds 秒，但若与下一段重叠则以下一段的 start 为上限。
+    \n不修改原始 JsonData，返回修改后的新主格式数据。"""
+    result = copy.deepcopy(JsonData)
+    segments = result.get("segments", [])
+    for i, seg in enumerate(segments):
+        new_end = seg.get("end", 0) + float(delay_seconds)
+        if i + 1 < len(segments):
+            next_start = segments[i + 1].get("start", 0)
+            seg["end"] = min(new_end, next_start)
+        else: seg["end"] = new_end
+    return result
 
 def normal_chunks(JsonData: dict, chunksize: int) -> list[dict]:
     """把主格式字幕分割为chunksize大小的块，放在一个列表里。

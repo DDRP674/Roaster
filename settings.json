@@ -30,6 +30,8 @@
     "global_memory": true,
     // 输出时的替换词
     "replacing": {" ": ["。", "，"]},
+    // 输出字幕的每一句默认延长多少秒（这是为了解决字幕跳的过快的问题）
+    "delay_segment_ends": 0.5,
 
     // 日志设置
     "log_dir": "./log",

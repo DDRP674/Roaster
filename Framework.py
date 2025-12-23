@@ -3,7 +3,7 @@ import logging
 import os
 import queue
 import threading, LLMAPI, Formats
-from lib_helper import func_name, load_json_with_comments, get_filename
+from lib_helper import func_name, load_json_with_comments
 import STT.STTServer, Tools.Database, Tools.VectorDatabase, Tools.Crawler
 
 class Framework:
@@ -58,6 +58,7 @@ class Framework:
                     break
 
                 with open(path, "r", encoding="utf-8") as f: OriginalJsonData = json.load(f)
+                if self.settings.get("delay_segment_ends", 0.0) > 0.0: OriginalJsonData = Formats.delay_segment_ends(OriginalJsonData, self.settings["delay_segment_ends"])
                 chunks = Formats.normal_chunks(OriginalJsonData, self.settings["chunk_size"])
 
                 processed_chunks = []
@@ -425,6 +426,3 @@ class Framework:
         """把资源清一清"""
         self.db.clear()
         self.vdb.__del__()
-        if self.settings["delete_stt"]:
-            for path in get_filename(self.settings["stts"]["output_dir"]): 
-                if os.path.exists(os.path.normpath(path)): os.remove(os.path.normpath(path))
