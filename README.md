@@ -2,6 +2,10 @@
 
 该项目（“烤肉机”）是一个简易的音视频翻译器，适用于单说话人、无较大噪音和背景音的场景。输入音视频，其将通过STT、LLM、RAG等技术进行翻译和润色，输出简体中文字幕。
 
+## 其他合作者
+
+https://github.com/Nuo-OUn
+
 # License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
