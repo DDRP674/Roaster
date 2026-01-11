@@ -2,6 +2,8 @@
 
 该项目（“烤肉机”）是一个简易的音视频翻译器，适用于单说话人、无较大噪音和背景音的场景。输入音视频，其将通过STT、LLM、RAG等技术进行翻译和润色，输出简体中文字幕。
 
+版本：1.1
+
 # License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -101,26 +103,6 @@ python main.py
 ```
 初次使用可能需要下载模型，请耐心等待。如果因网络问题下载失败，可直接重试。
 
-# 关于设置
-
-settings.json 存放了烤肉机相关配置选项，这里仅做部分介绍。
-  
-"enable_refine" : true/false 是否开启润色（默认关闭）。润色将消耗更多token，同时有时反而会导致翻译质量下降。  
-  
-"chunk_size": 一个整数（例如50） 这个选项决定了单次调用大语言模型时同时处理的句子数量。它将影响翻译速度。
-  
-"Crawler": 存放了与网络爬虫有关的配置，默认关闭。它可以通过网络搜索获取内容以辅助翻译，但其实没什么用。  
-  
-"search_local": true/false 决定是否启用历史翻译内容查询。默认关闭。在大规模翻译任务（长音视频、多集音视频）中可能有效。
-  
-"global_memory": true/false 是否在不同视频中共享历史翻译内容。默认开启。如果开启了"search_local"并且不同音视频文件之间没有关联时，可以改为false。
-  
-"stts": 存放了字幕转录相关模块的配置。  
-— "engine": "whisper"/"stable_whisper" 所使用的转录服务。建议使用"stable_whisper"。  
-— "model": 所使用的模型。一般medium效果足够。如果显存不足可尝试base/small等模型。  
-
-"llms": 存放了与大语言模型API相关的配置。
-
 # 常见问题
 
 ### Q1: 安装 requirements.txt 时出错
@@ -129,7 +111,7 @@ settings.json 存放了烤肉机相关配置选项，这里仅做部分介绍。
 - **特定包失败**：手动安装失败包
 
 ### Q2: 显存不足（CUDA out of memory）
-- 在 settings.json 中将 model 改为 "base" 或 "small"
+- 使用更小的转录模型
 
 ### Q3: 下载模型失败
 - 手动下载模型放到指定目录

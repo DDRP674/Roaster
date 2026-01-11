@@ -1,0 +1,2 @@
+2026-01-11 21:43:07,894 - INFO - Loading faiss.
+2026-01-11 21:43:07,957 - INFO - Successfully loaded faiss.

@@ -4,6 +4,7 @@ import faiss
 import sqlite3
 import numpy as np
 import torch
+import threading
 from transformers import AutoTokenizer, AutoModel
 
 class Embedder: 
@@ -71,19 +72,22 @@ class VDB:
     
     def init_sqlite(self):
         """初始化SQLite数据库"""
-        self.conn = sqlite3.connect(self.temp_path)
+        # allow using the connection from multiple threads; protect access with a lock
+        self.conn = sqlite3.connect(self.temp_path, check_same_thread=False)
         self.cursor = self.conn.cursor()
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS texts (
-                id INTEGER PRIMARY KEY,
-                original_text TEXT,
-                translated_text TEXT
-            )
-        ''')
-        self.conn.commit()
-        self.cursor.execute("SELECT MAX(id) FROM texts")
-        result = self.cursor.fetchone()
-        self.next_id = result[0] + 1 if result[0] is not None else 0
+        self._conn_lock = threading.Lock()
+        with self._conn_lock:
+            self.cursor.execute('''
+                CREATE TABLE IF NOT EXISTS texts (
+                    id INTEGER PRIMARY KEY,
+                    original_text TEXT,
+                    translated_text TEXT
+                )
+            ''')
+            self.conn.commit()
+            self.cursor.execute("SELECT MAX(id) FROM texts")
+            result = self.cursor.fetchone()
+            self.next_id = result[0] + 1 if result[0] is not None else 0
     
     def save(self, messagelist: list[dict[str, str]]):
         """存入，格式为：[{ "OriginalText": , "TranslatedText": }]"""
@@ -105,17 +109,19 @@ class VDB:
         self.original_index.add(original_embeddings)
         self.translated_index.add(translated_embeddings)
         
-        for i, msg in enumerate(messagelist):
-            db_id = self.next_id + i
-            faiss_index = start_index + i
-            self.id_map[faiss_index] = db_id
-            
-            self.cursor.execute(
-                "INSERT INTO texts (id, original_text, translated_text) VALUES (?, ?, ?)",
-                (db_id, msg.get("OriginalText", ""), msg.get("TranslatedText", ""))
-            )
-        self.next_id += len(messagelist)
-        self.conn.commit()
+# Insert DB records under lock; embeddings and FAISS ops are done outside the lock
+        with self._conn_lock:
+            for i, msg in enumerate(messagelist):
+                db_id = self.next_id + i
+                faiss_index = start_index + i
+                self.id_map[faiss_index] = db_id
+
+                self.cursor.execute(
+                    "INSERT INTO texts (id, original_text, translated_text) VALUES (?, ?, ?)",
+                    (db_id, msg.get("OriginalText", ""), msg.get("TranslatedText", ""))
+                )
+            self.next_id += len(messagelist)
+            self.conn.commit()
         logging.info(f"保存了 {len(messagelist)} 条记录")
     
     def search(self, query: dict, k: int, threshold=0.6) -> list[dict]:
@@ -158,11 +164,12 @@ class VDB:
                 db_id = self.id_map.get(faiss_index)
                 
                 if db_id is not None:
-                    self.cursor.execute(
-                        "SELECT original_text, translated_text FROM texts WHERE id = ?", 
-                        (db_id,)
-                    )
-                    result = self.cursor.fetchone()
+                    with self._conn_lock:
+                        self.cursor.execute(
+                            "SELECT original_text, translated_text FROM texts WHERE id = ?", 
+                            (db_id,)
+                        )
+                        result = self.cursor.fetchone()
                     if result:
                         results.append({
                             "OriginalText": result[0],
@@ -176,11 +183,13 @@ class VDB:
     def clear(self): # 待测试
         """把用于对应向量的数据库清空，id归零。包括内存中的向量索引"""
         # 清SQLite
-        if hasattr(self, 'cursor') and self.cursor:
-            self.cursor.execute("DELETE FROM texts")
-            self.conn.commit()
-            self.next_id = 0
-            self.id_map.clear() 
+        if hasattr(self, '_conn_lock'):
+            with self._conn_lock:
+                if hasattr(self, 'cursor') and self.cursor:
+                    self.cursor.execute("DELETE FROM texts")
+                    self.conn.commit()
+                self.next_id = 0
+                self.id_map.clear() 
 
         if hasattr(self, 'original_index'):
             try:
@@ -224,8 +233,9 @@ class VDB:
         logging.info("数据库和向量索引已清空")
     
     def get_stats(self) -> dict:
-        self.cursor.execute("SELECT COUNT(*) FROM texts")
-        count = self.cursor.fetchone()[0]
+        with self._conn_lock:
+            self.cursor.execute("SELECT COUNT(*) FROM texts")
+            count = self.cursor.fetchone()[0]
         return {
             "total_records": count,
             "next_id": self.next_id,
@@ -238,8 +248,13 @@ class VDB:
     def __del__(self):
         """析构函数，安全地清理资源"""
         try:
-            if hasattr(self, 'conn') and self.conn:
-                self.conn.close()
+            if hasattr(self, '_conn_lock'):
+                with self._conn_lock:
+                    if hasattr(self, 'conn') and self.conn:
+                        self.conn.close()
+            else:
+                if hasattr(self, 'conn') and self.conn:
+                    self.conn.close()
         except Exception as e: pass
 
 if __name__ == "__main__": pass

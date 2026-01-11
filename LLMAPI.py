@@ -1,4 +1,4 @@
-import openai, os, logging
+import openai, os, logging, json
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib_helper import load_json_with_comments, func_name
@@ -170,12 +170,19 @@ class LLM:
         try:
             client = openai.OpenAI(api_key=settings["api_key"], base_url=settings["api_base"])
             if settings.get("response_format", False):
-                completion = client.chat.completions.create(
-                    model=settings["model"],
-                    messages=messagelist,
-                    temperature=settings.get("temperature", 1.0),
-                    response_format=settings["response_format"]
-                )
+                try:
+                    completion = client.chat.completions.create(
+                        model=settings["model"],
+                        messages=messagelist,
+                        temperature=settings.get("temperature", 1.0),
+                        response_format=settings["response_format"]
+                    )
+                except Exception as e:
+                    completion = client.chat.completions.create(
+                        model=settings["model"],
+                        messages=messagelist,
+                        temperature=settings.get("temperature", 1.0)
+                    )
             else:
                 completion = client.chat.completions.create(
                     model=settings["model"],
@@ -185,5 +192,8 @@ class LLM:
         except Exception as e:
             logging.error(f"{func_name()}: {e}")
             return {}
+        content = completion.choices[0].message.content
+        if type(content) == bytes: content = content.decode('utf-8')
+        if type(content) == dict: content = json.dumps(content, ensure_ascii=False)
         logging.debug(f"{completion.choices[0].message.content}")
         return { "role": "assistant", "content": completion.choices[0].message.content }

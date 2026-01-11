@@ -7,17 +7,20 @@ from lib_helper import func_name, load_json_with_comments
 import STT.STTServer, Tools.Database, Tools.VectorDatabase, Tools.Crawler
 
 class Framework:
-    def __init__(self):
+    def __init__(self, description_override: str|None=None):
         self.settings = load_json_with_comments("settings.json")
 
         self.output_dir = os.path.normpath(self.settings["output_dir"])
         os.makedirs(self.output_dir, exist_ok=True)
 
         self.llms = LLMAPI.LLM()
-        description_path = os.path.normpath(self.settings["description_input_path"])
-        if os.path.exists(description_path):
-            with open(description_path, "r", encoding="utf-8") as f: self.description = f.read()
-            self.description = self.description.strip()
+        # ensure description attribute always exists to avoid AttributeError
+        self.description = ""
+
+        # Determine initial prompt: prefer runtime override, otherwise read from file
+        result = ""
+        if description_override is not None:
+            self.description = description_override.strip()
             if self.description:
                 try:
                     result = self.llms.req([
@@ -28,8 +31,25 @@ class Framework:
                 except Exception as e:
                     logging.warning(f"{func_name()}: STT初始Prompt生成失败：{e}")
                     result = ""
-            else: result = ""
-        else: result = ""
+        else:
+            description_path = os.path.normpath(self.settings["description_input_path"])
+            if os.path.exists(description_path):
+                with open(description_path, "r", encoding="utf-8") as f: self.description = f.read()
+                self.description = self.description.strip()
+                if self.description:
+                    try:
+                        result = self.llms.req([
+                            {"role": "system", "content": LLMAPI.INITIAL_PROMPT_GENERATION},
+                            {"role": "user", "content": self.description}
+                        ], self.settings["llms"]["SmallModel"])["content"]
+                        result = result.strip() if result.strip() != "UNKNOWN" else ""
+                    except Exception as e:
+                        logging.warning(f"{func_name()}: STT初始Prompt生成失败：{e}")
+                        result = ""
+                else:
+                    result = ""
+            else:
+                result = ""
         self.stt = STT.STTServer.STTServer(result)
 
         self.db = Tools.Database.DB()
@@ -51,7 +71,7 @@ class Framework:
         if self.settings["global_memory"]:
             PostTaskList = []
 
-            while True:
+            for _ in range(10):
                 path = os.path.normpath(self.processing_queue.get())
                 if path == STT.STTServer.DONE: 
                     logging.info(f"{func_name()}: 翻译完毕")
@@ -98,7 +118,7 @@ class Framework:
 
         else:
             enable_refine = self.settings["enable_refine"]
-            while True:
+            for _ in range(10):
                 path = os.path.normpath(self.processing_queue.get())
                 if path == STT.STTServer.DONE: 
                     logging.info(f"{func_name()}: 处理完毕")
@@ -276,7 +296,7 @@ class Framework:
             StrongFormat=StrongFormat,
             description=self.description if self.description else "未提供"
         )}]
-        while True:
+        for _ in range(10):
             translate_result = self.llms.req(translate_msg, self.settings["llms"]["LargeModelJson"])
             
             # 8
@@ -401,7 +421,7 @@ class Framework:
             description=self.description if self.description else "未提供"
         )}]
 
-        while True:
+        for _ in range(10):
             refine_result = self.llms.req(refine_msg, self.settings["llms"]["LargeModelJson"])
             
             # 6

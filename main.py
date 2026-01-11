@@ -1,7 +1,6 @@
 import datetime
 from logging.handlers import RotatingFileHandler
-import sys, Framework
-import time
+import sys
 from lib_helper import load_json_with_comments
 import os, logging
 
@@ -37,9 +36,5 @@ else:
         handlers=[logging.StreamHandler(sys.stdout)]
     )
 
-# 主程序
-start = time.time()
-f = Framework.Framework()
-logging.info(f"初始化用时：{round(time.time()-start,3)}秒")
-f.run()
-logging.info(f"完整用时：{round(time.time()-start,3)}秒")
+from ui import demo
+demo.launch()
