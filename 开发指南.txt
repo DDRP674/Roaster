@@ -1,3 +1,0 @@
-TODO:
-页面底端改成github主页和license
-容器化

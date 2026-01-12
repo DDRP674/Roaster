@@ -216,8 +216,10 @@ def update_live_view():
     return status_out, desc_out
 
 
+
 # Build Gradio UI
 with gr.Blocks(title="烤肉机") as demo:
+
     gr.Markdown("## 烤肉机控制面板")
     with gr.Tab("主程序"):
         with gr.Row():
@@ -290,5 +292,56 @@ with gr.Blocks(title="烤肉机") as demo:
     vals = load_settings_to_controls()
     try: (enable_refine.value, chunk_size.value, crawler_enable.value, crawler_website.value, search_local.value, enable_parallel.value, max_retry.value, embedding_model_name.value, delete_stt.value, global_memory.value, delay_segment_ends.value, do_log.value, stt_model.value, no_speech_threshold.value, small_api_key.value, small_api_base.value, small_model.value, small_temperature.value, large_api_key.value, large_api_base.value, large_model.value, large_temperature.value, description_text.value, msg) = vals
     except Exception: pass
+
+    # ========== 自定义页脚区域 ==========
+    gr.HTML("""<div style="height: 1px; background: #e0e0e0; margin: 40px 0;"></div>""")
+    
+    with gr.Column():
+        gr.HTML("""
+        <div style="
+            width: 100%;
+            text-align: center;
+            padding: 25px 0;
+            color: #666;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        ">
+            <p style="font-size: 14px; margin-bottom: 10px;">
+            </p>
+            <div style="margin: 15px 0;">
+                <a href="https://github.com/DDRP674/Roaster" 
+                    target="_blank" 
+                    style="
+                        display: inline-block;
+                        padding: 8px 20px;
+                        background: linear-gradient(45deg, #0366d6, #28a745);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 20px;
+                        font-weight: 500;
+                        transition: transform 0.2s;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fab fa-github"></i> &nbsp;欢迎访问Github项目地址
+                </a>
+            </div>
+            <p style="font-size: 12px; margin-top: 15px; opacity: 0.7;">
+                版本 1.1
+            </p>
+        </div>
+        """)
+
+        gr.HTML("""
+        <div style="text-align: center; padding: 20px; color: #666;">
+            <div style="display: flex; justify-content: center; gap: 15px; margin: 15px 0;">
+                <a href="https://opensource.org/licenses/MIT" target="_blank">
+                    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License">
+                </a>
+                <a href="https://github.com/996icu/996.ICU" target="_blank">
+                    <img src="https://img.shields.io/badge/License-Anti%20996-red.svg" alt="Anti 996 License">
+                </a>
+            </div>
+        </div>
+        """)
 
 if __name__ == "__main__": demo.launch()

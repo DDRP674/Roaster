@@ -1,5 +1,0 @@
-2026-01-11 21:54:35,555 - INFO - Loading faiss.
-2026-01-11 21:54:35,612 - INFO - Successfully loaded faiss.
-2026-01-11 21:54:42,555 - INFO - HTTP Request: GET http://127.0.0.1:7860/gradio_api/startup-events "HTTP/1.1 200 OK"
-2026-01-11 21:54:42,572 - INFO - HTTP Request: HEAD http://127.0.0.1:7860/ "HTTP/1.1 200 OK"
-2026-01-11 21:54:43,517 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"

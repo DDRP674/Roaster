@@ -43,7 +43,7 @@
     },
     "llms": {
         "SmallModel": {
-            "api_key": "sk-ab7bb58d51754161838381efa2ee7f93",
+            "api_key": "sk-",
             "api_base": "https://api.deepseek.com",
             "model": "deepseek-chat",
             "temperature": 1.3
@@ -55,7 +55,7 @@
             "temperature": 1.3
         },
         "LargeModelJson": {
-            "api_key": "sk-ab7bb58d51754161838381efa2ee7f93",
+            "api_key": "sk-",
             "api_base": "https://api.deepseek.com",
             "model": "deepseek-chat",
             "temperature": 1.3,
