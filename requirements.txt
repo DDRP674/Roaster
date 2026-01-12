@@ -1,0 +1,14 @@
+openai-whisper
+stable-ts
+faiss-cpu
+pysubs2>=1.6.1
+transformers>=4.30.0
+sentence-transformers>=2.2.2
+numpy>=1.21.0
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+openai>=1.0.0
+tqdm>=4.64.0
+click>=8.1.0
+colorlog>=6.7.0

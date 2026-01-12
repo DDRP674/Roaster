@@ -1,0 +1,67 @@
+{
+    "input_dir": "./input",
+    "input_exts": [
+        ".mp4",
+        ".mkv",
+        ".avi",
+        ".mp3",
+        ".wav",
+        ".flac",
+        ".m4a"
+    ],
+    "description_input_path": "./input/description.txt",
+    "output_dir": "./output",
+    "enable_refine": false,
+    "chunk_size": 50,
+    "Crawler": {
+        "enable_crawler": false,
+        "website": "https://cn.bing.com/search?q={query}"
+    },
+    "search_local": false,
+    "enable_parallel": true,
+    "max_retry": 3,
+    "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "delete_stt": true,
+    "global_memory": true,
+    "replacing": {
+        " ": [
+            "。",
+            "，"
+        ]
+    },
+    "delay_segment_ends": 0.5,
+    "log_dir": "./log",
+    "do_log": true,
+    "stts": {
+        "output_dir": "STT/temp",
+        "engine_settings": {
+            "model": "medium",
+            "no_speech_threshold": 0.7,
+            "use_initial_prompt": false,
+            "original_language": ""
+        }
+    },
+    "llms": {
+        "SmallModel": {
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3
+        },
+        "LargeModel": {
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3
+        },
+        "LargeModelJson": {
+            "api_key": "sk-",
+            "api_base": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+            "temperature": 1.3,
+            "response_format": {
+                "type": "json_object"
+            }
+        }
+    }
+}
