@@ -193,6 +193,7 @@ class LLM:
             logging.error(f"{func_name()}: {e}")
             return {}
         content = completion.choices[0].message.content
+        if type(content) == str: content = content.strip("`").strip("json").strip()
         if type(content) == bytes: content = content.decode('utf-8')
         if type(content) == dict: content = json.dumps(content, ensure_ascii=False)
         logging.debug(f"{completion.choices[0].message.content}")
