@@ -197,4 +197,4 @@ class LLM:
         if type(content) == bytes: content = content.decode('utf-8')
         if type(content) == dict: content = json.dumps(content, ensure_ascii=False)
         logging.debug(f"{completion.choices[0].message.content}")
-        return { "role": "assistant", "content": completion.choices[0].message.content }
+        return { "role": "assistant", "content": content }
